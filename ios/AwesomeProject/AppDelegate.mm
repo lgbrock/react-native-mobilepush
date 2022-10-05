@@ -6,6 +6,9 @@
 
 #import <React/RCTAppSetupUtils.h>
 
+// Add this import at the top (before #if RCT_NEW_ARCH_ENABLED)
+#import <MarketingCloudSDK/MarketingCloudSDK.h>
+
 #if RCT_NEW_ARCH_ENABLED
 #import <React/CoreModulesPlugins.h>
 #import <React/RCTCxxBridgeDelegate.h>
@@ -17,6 +20,8 @@
 #import <react/config/ReactNativeConfig.h>
 
 static NSString *const kRNConcurrentRoot = @"concurrentRoot";
+
+@interface AppDelegate : UIResponder <UIApplicationDelegate, RCTBridgeDelegate, UNUserNotificationCenterDelegate>
 
 @interface AppDelegate () <RCTCxxBridgeDelegate, RCTTurboModuleManagerDelegate> {
   RCTTurboModuleManager *_turboModuleManager;
@@ -31,6 +36,18 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+
+  MarketingCloudSDKConfigBuilder *mcsdkBuilder = [MarketingCloudSDKConfigBuilder new];
+    [mcsdkBuilder sfmc_setApplicationId:@"7d957421-1c78-4eb4-b08e-ea6d2394a3e9"];
+    [mcsdkBuilder sfmc_setAccessToken:@"byuyTVJNdyv79JqsUprcBtR2"];
+    [mcsdkBuilder sfmc_setAnalyticsEnabled:@(YES)];
+    [mcsdkBuilder sfmc_setMarketingCloudServerUrl:@"https://mchl2nbhxv6-wy1sw36p75pysf08.device.marketingcloudapis.com/"];
+
+    NSError *error = nil;
+    BOOL success =
+        [[MarketingCloudSDK sharedInstance] sfmc_configureWithDictionary:[mcsdkBuilder sfmc_build]
+                                                                   error:&error];
+
   RCTAppSetupPrepareApp(application);
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];

@@ -12,7 +12,10 @@
   "dependencies": {
     "react": "18.1.0",
     "react-native": "0.70.2",
-    "react-native-marketingcloudsdk": "^7.5.2"
+    "react-native-marketingcloudsdk": "^7.5.2",
+    "react-router-dom": "^6.4.2",
+    "uuid": "^9.0.0",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

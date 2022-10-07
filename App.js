@@ -1,117 +1,100 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+// SignUp.js
+import React, {useState} from 'react';
+import {View, Button, TextInput, StyleSheet} from 'react-native';
+// import Main from './components/Main';
+import Registered from './components/Registered';
+import MCReactModule from './sfmc.d.ts';
 
-import React from 'react';
-import type {Node} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+export default class SignUp extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      first_name: 'Logan',
+      last_name: 'Brock',
+      email: 'lbrock@eigenx.com',
+      company: 'Eigen X',
+    };
+  }
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  register() {
+    const {first_name, last_name, email, company} = this.state;
+    const data = {
+      first_name: first_name,
+      last_name: last_name,
+      email: email,
+      company: company,
+    };
+    // set data from state
+    MCReactModule.setContactKeyValues(data);
+    // register contact
+    MCReactModule.registerContact();
+    console.log(data);
+  }
 
-/* $FlowFixMe[missing-local-annot] The type annotation(s) required by Flow's
- * LTI update could not be added via codemod */
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
-
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  onChangeText = (key, val) => {
+    this.setState({[key]: val});
   };
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+  render() {
+    return (
+      <View style={styles.container}>
+        <Registered />
+        {/* <TextInput
+          style={styles.input}
+          placeholder="First Name"
+          autoCapitalize="none"
+          placeholderTextColor="white"
+          onChangeText={val => this.onChangeText('first_name', val)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Last Name"
+          autoCapitalize="none"
+          placeholderTextColor="white"
+          onChangeText={val => this.onChangeText('last_name', val)}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          autoCapitalize="none"
+          placeholderTextColor="white"
+          onChangeText={val => this.onChangeText('email', val)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Company"
+          autoCapitalize="none"
+          placeholderTextColor="white"
+          onChangeText={val => this.onChangeText('company', val)}
+        />
+        <Button title="Sign Up" onPress={this.handleRegisterButton()} />
+
+        <Button
+          style={styles.input}
+          title="Register"
+          onPress={() => this.register()}
+        /> */}
+      </View>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
+  input: {
+    width: 350,
+    height: 55,
+    backgroundColor: '#42A5F5',
+    margin: 10,
+    padding: 8,
+    color: 'white',
+    borderRadius: 14,
     fontSize: 18,
-    fontWeight: '400',
+    fontWeight: '500',
   },
-  highlight: {
-    fontWeight: '700',
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
-
-export default App;

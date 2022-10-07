@@ -21,8 +21,6 @@
 
 static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate, RCTBridgeDelegate, UNUserNotificationCenterDelegate>
-
 @interface AppDelegate () <RCTCxxBridgeDelegate, RCTTurboModuleManagerDelegate> {
   RCTTurboModuleManager *_turboModuleManager;
   RCTSurfacePresenterBridgeAdapter *_bridgeAdapter;
@@ -36,18 +34,57 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-
+  
   MarketingCloudSDKConfigBuilder *mcsdkBuilder = [MarketingCloudSDKConfigBuilder new];
-    [mcsdkBuilder sfmc_setApplicationId:@"7d957421-1c78-4eb4-b08e-ea6d2394a3e9"];
-    [mcsdkBuilder sfmc_setAccessToken:@"byuyTVJNdyv79JqsUprcBtR2"];
-    [mcsdkBuilder sfmc_setAnalyticsEnabled:@(YES)];
-    [mcsdkBuilder sfmc_setMarketingCloudServerUrl:@"https://mchl2nbhxv6-wy1sw36p75pysf08.device.marketingcloudapis.com/"];
-
-    NSError *error = nil;
-    BOOL success =
-        [[MarketingCloudSDK sharedInstance] sfmc_configureWithDictionary:[mcsdkBuilder sfmc_build]
-                                                                   error:&error];
-
+  [mcsdkBuilder sfmc_setApplicationId:@"7d957421-1c78-4eb4-b08e-ea6d2394a3e9"];
+  [mcsdkBuilder sfmc_setAccessToken:@"byuyTVJNdyv79JqsUprcBtR2"];
+  [mcsdkBuilder sfmc_setAnalyticsEnabled:@(YES)];
+  [mcsdkBuilder sfmc_setMarketingCloudServerUrl:@"https://mchl2nbhxv6-wy1sw36p75pysf08.device.marketingcloudapis.com/"];
+  
+  NSError *error = nil;
+  BOOL success =
+  [[MarketingCloudSDK sharedInstance] sfmc_configureWithDictionary:[mcsdkBuilder sfmc_build]
+                                                             error:&error];
+  
+  if (success == YES) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      if (@available(iOS 10, *)) {
+        // set the UNUserNotificationCenter delegate - the delegate must be set here in
+        // didFinishLaunchingWithOptions
+        [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+        [[UIApplication sharedApplication] registerForRemoteNotifications];
+        
+        [[UNUserNotificationCenter currentNotificationCenter]
+         requestAuthorizationWithOptions:UNAuthorizationOptionAlert |
+         UNAuthorizationOptionSound |
+         UNAuthorizationOptionBadge
+         completionHandler:^(BOOL granted, NSError *_Nullable error) {
+          if (error == nil) {
+            if (granted == YES) {
+              dispatch_async(dispatch_get_main_queue(), ^{
+              });
+            }
+          }
+        }];
+      } else {
+        
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 100000
+        UIUserNotificationSettings *settings = [UIUserNotificationSettings
+                                                settingsForTypes:UIUserNotificationTypeBadge | UIUserNotificationTypeSound |
+                                                UIUserNotificationTypeAlert
+                                                categories:nil];
+        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+#endif
+        [[UIApplication sharedApplication] registerForRemoteNotifications];
+      }
+    });
+  } else {
+    //  MarketingCloudSDK sfmc_configure failed
+    os_log_debug(OS_LOG_DEFAULT, "MarketingCloudSDK sfmc_configure failed with error = %@",
+                 error);
+  }
+  
+  // RN setup
   RCTAppSetupPrepareApp(application);
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
@@ -74,8 +111,55 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
+  
   return YES;
+
 }
+
+- (void)application:(UIApplication *)application
+    didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    [[MarketingCloudSDK sharedInstance] sfmc_setDeviceToken:deviceToken];
+}
+
+- (void)application:(UIApplication *)application
+    didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+    os_log_debug(OS_LOG_DEFAULT, "didFailToRegisterForRemoteNotificationsWithError = %@", error);
+}
+
+// The method will be called on the delegate when the user responded to the notification by opening
+// the application, dismissing the notification or choosing a UNNotificationAction. The delegate
+// must be set before the application returns from applicationDidFinishLaunching:.
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+    didReceiveNotificationResponse:(UNNotificationResponse *)response
+             withCompletionHandler:(void (^)(void))completionHandler {
+    // tell the MarketingCloudSDK about the notification
+    [[MarketingCloudSDK sharedInstance] sfmc_setNotificationRequest:response.notification.request];
+
+    if (completionHandler != nil) {
+        completionHandler();
+    }
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:
+             (void (^)(UNNotificationPresentationOptions options))completionHandler {
+    NSLog(@"User Info : %@", notification.request.content.userInfo);
+    completionHandler(UNAuthorizationOptionSound | UNAuthorizationOptionAlert |
+                      UNAuthorizationOptionBadge);
+}
+
+// This method is REQUIRED for correct functionality of the SDK.
+// This method will be called on the delegate when the application receives a silent push
+
+- (void)application:(UIApplication *)application
+    didReceiveRemoteNotification:(NSDictionary *)userInfo
+          fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    [[MarketingCloudSDK sharedInstance] sfmc_setNotificationUserInfo:userInfo];
+
+    completionHandler(UIBackgroundFetchResultNewData);
+}
+
 
 /// This method controls whether the `concurrentRoot`feature of React18 is turned on or off.
 ///

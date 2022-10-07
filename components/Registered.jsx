@@ -1,21 +1,20 @@
 import React, {useState} from 'react';
-import {
-  Text,
-  TextInput,
-  View,
-  FlatList,
-  StyleSheet,
-  Button,
-} from 'react-native';
+import {TextInput, View, StyleSheet, Button} from 'react-native';
 
-// Need to setName
-// onPress={() => setItem([...item, {id: 4, name: 'item 4'}])}
+import MCReactModule from './../sfmc.d.ts';
 
 const Registered = () => {
   const [email, setEmail] = useState('');
 
   handleConfirmEmailButton = () => {
-    console.log('Email confirmed');
+    console.log(`'${email}'`);
+    MCReactModule.confirmContact(email, (success, error) => {
+      if (success) {
+        console.log(`Contact '${email}' confirmed successfully`);
+      } else {
+        console.log('Error', error);
+      }
+    });
   };
 
   return (

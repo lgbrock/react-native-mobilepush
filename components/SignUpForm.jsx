@@ -71,7 +71,11 @@ const SignUpForm = () => {
           onPress={() =>
             console.log(`'${firstname}' '${lastname}' '${email}' '${company}'`)
           }
+        />
+        <Button
+          title="Sign Up"
           handleSignUpButton={handleSignUpButton}
+          onPress={() => console.log(`'${handleSignUpButton}'`)}
         />
       </View>
     </>

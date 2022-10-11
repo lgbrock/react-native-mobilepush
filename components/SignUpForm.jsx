@@ -11,28 +11,30 @@ import {
 import MCReactModule from './../sfmc.d.ts';
 
 const SignUpForm = () => {
+  const [contactKey, setContactKey] = useState('');
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
 
-  handleSignUpButton = () => {
-    console.log(`'${firstname}' '${lastname}' '${email}' '${company}'`);
-    MCReactModule.registerContact(
-      firstname,
-      lastname,
-      email,
-      company,
-      (success, error) => {
-        if (success) {
-          console.log(
-            `Contact '${firstname}' '${lastname}' '${email}' '${company}' registered successfully`,
-          );
-        } else {
-          console.log('Error', error);
-        }
+  // GET contact key from SFMC SDK and set it to state variable contactKey
+  const getContactKey = async () => {
+    const contactKey = await MCReactModule.getContactKey();
+    setContactKey(contactKey);
+  };
+
+  // POST data to SFMC SDK
+  const postContactData = async () => {
+    const data = {
+      ContactKey: contactKey,
+      Attributes: {
+        FirstName: firstname,
+        LastName: lastname,
+        Email: email,
+        Company: company,
       },
-    );
+    };
+    await MCReactModule.postContactData(data);
   };
 
   return (
@@ -66,17 +68,11 @@ const SignUpForm = () => {
           placeholderTextColor="white"
           onChangeText={company => setCompany(company)}
         />
-        <Button
-          title="Confirm Email"
-          onPress={() =>
-            console.log(`'${firstname}' '${lastname}' '${email}' '${company}'`)
-          }
-        />
-        <Button
-          title="Sign Up"
-          handleSignUpButton={handleSignUpButton}
-          onPress={() => console.log(`'${handleSignUpButton}'`)}
-        />
+
+        <Button title="Get Contact Key" onPress={getContactKey} />
+        <Button title="Post Contact Data" onPress={postContactData} />
+
+        <Text style={styles.text}>Contact Key: {contactKey}</Text>
       </View>
     </>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-// import Main from './components/Main';
+import Main from './components/Main';
 import Registered from './components/Registered';
 import SignUpForm from './components/SignUpForm';
 
@@ -8,7 +8,7 @@ export default class App extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Registered />
+        <SignUpForm />
       </View>
     );
   }

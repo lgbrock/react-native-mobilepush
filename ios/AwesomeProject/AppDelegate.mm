@@ -34,7 +34,7 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  
+
   MarketingCloudSDKConfigBuilder *mcsdkBuilder = [MarketingCloudSDKConfigBuilder new];
   [mcsdkBuilder sfmc_setApplicationId:@"7d957421-1c78-4eb4-b08e-ea6d2394a3e9"];
   [mcsdkBuilder sfmc_setAccessToken:@"byuyTVJNdyv79JqsUprcBtR2"];

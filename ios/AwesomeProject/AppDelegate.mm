@@ -40,6 +40,7 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
   [mcsdkBuilder sfmc_setAccessToken:@"byuyTVJNdyv79JqsUprcBtR2"];
   [mcsdkBuilder sfmc_setAnalyticsEnabled:@(YES)];
   [mcsdkBuilder sfmc_setMarketingCloudServerUrl:@"https://mchl2nbhxv6-wy1sw36p75pysf08.device.marketingcloudapis.com/"];
+  [mcsdkBuilder sfmc_setDelayRegistrationUntilContactKeyIsSet:@(YES)];
   
   NSError *error = nil;
   BOOL success =

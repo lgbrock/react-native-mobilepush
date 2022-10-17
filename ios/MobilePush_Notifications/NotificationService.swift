@@ -5,7 +5,8 @@
 //  Created by Logan Brock on 10/6/22.
 //
 
-import UserNotifications
+#import <CoreGraphics/CoreGraphics.h>
+#import "NotificationService.h"
 
 class NotificationService: UNNotificationServiceExtension {
 

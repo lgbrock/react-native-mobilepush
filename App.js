@@ -1,15 +1,15 @@
 import React from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, ScrollView} from 'react-native';
 import Main from './components/Main';
-import Registered from './components/Registered';
-import SignUpForm from './components/SignUpForm';
 
 export default class App extends React.Component {
   render() {
     return (
+      <ScrollView contentContainerStyle={{paddingTop: 65}}>
       <View style={styles.container}>
-        <SignUpForm />
+        <Main />
       </View>
+      </ScrollView>
     );
   }
 }

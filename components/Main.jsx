@@ -11,7 +11,6 @@ import MCReactModule from 'react-native-marketingcloudsdk';
 
 const SignUpForm = () => {
   const [contactKey, setContactKey] = useState();
-  const [pushEnabled, setPushEnabled] = useState('');
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -28,7 +27,6 @@ const SignUpForm = () => {
     }else{
       setDisableGet(false);
       setDisableSet(true);
-      MCReactModule.enablePush();
     }
     setContactKey(contactKey);
   };
@@ -49,6 +47,10 @@ const SignUpForm = () => {
       },
     };
     await MCReactModule.postContactData(data);
+  };
+
+  const getSFContactInfo = async () => {
+    
   };
 
   const resetApp = async () => {
@@ -74,8 +76,19 @@ const SignUpForm = () => {
           />
           <Button title="Set Device Contact Key" onPress={setContactKey} disabled={disableSet}/>
         </View>
-        <View style={{ borderBottomColor: '#bdbdbd', borderBottomWidth: 2, width: '90%', marginBottom: 20, paddingBottom: 20, paddingTop: 20 }}>
-          <Text style={styles.titleText}>Marketing Cloud Contact Create</Text>
+        <View style={{ borderBottomColor: '#bdbdbd', borderBottomWidth: 2, width: '90%', marginBottom: 20, paddingBottom: 20}}>
+          <Text style={styles.titleText}>Existing Contact</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="SF Contact Email"
+            autoCapitalize="none"
+            placeholderTextColor="white"
+            onChangeText={email => setEmail(email)}
+          />
+          <Button title="Get SF ID And Set Contact Key" onPress={setContactKey} disabled={disableSet}/>
+        </View>
+        <View style={{width: '90%', marginBottom: 20, paddingBottom: 20}}>
+          <Text style={styles.titleText}>New Contact</Text>
           <TextInput
             style={styles.input}
             placeholder="First Name"
@@ -104,7 +117,7 @@ const SignUpForm = () => {
             placeholderTextColor="white"
             onChangeText={company => setCompany(company)}
           />
-          <Button title="Create Contact And Get Key" onPress={postContactData} />
+          <Button title="Create Contact And Get Key" onPress={getSFContactInfo} />
         </View>
       </View>
     </>

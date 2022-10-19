@@ -49,7 +49,7 @@ const SignUpForm = () => {
     await MCReactModule.postContactData(data);
   };
 
-  async function getSFContactInfo = async () => {
+  const getSFContactInfo = async () => {
       try {
         let response = await fetch('https://mchl2nbhxv6-wy1sw36p75pysf08.pub.sfmc-content.com/vh45v3ar14h', {
           method: 'POST',
@@ -62,12 +62,11 @@ const SignUpForm = () => {
           }),
         });
         let responseJson = await response.json();
-        console.log(responseJSon);
-        return responseJson;
+        console.log(responseJson);
       } catch (error) {
         console.error(error);
       }
-  }
+  };
 
   const resetApp = async () => {
   };

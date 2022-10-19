@@ -49,9 +49,25 @@ const SignUpForm = () => {
     await MCReactModule.postContactData(data);
   };
 
-  const getSFContactInfo = async () => {
-    
-  };
+  async function getSFContactInfo = async () => {
+      try {
+        let response = await fetch('https://mchl2nbhxv6-wy1sw36p75pysf08.pub.sfmc-content.com/vh45v3ar14h', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            "email": email,
+          }),
+        });
+        let responseJson = await response.json();
+        console.log(responseJSon);
+        return responseJson;
+      } catch (error) {
+        console.error(error);
+      }
+  }
 
   const resetApp = async () => {
   };
@@ -85,7 +101,7 @@ const SignUpForm = () => {
             placeholderTextColor="white"
             onChangeText={email => setEmail(email)}
           />
-          <Button title="Get SF ID And Set Contact Key" onPress={setContactKey} disabled={disableSet}/>
+          <Button title="Get SF ID And Set Contact Key" onPress={getSFContactInfo} disabled={disableSet}/>
         </View>
         <View style={{width: '90%', marginBottom: 20, paddingBottom: 20}}>
           <Text style={styles.titleText}>New Contact</Text>

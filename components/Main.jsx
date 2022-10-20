@@ -71,6 +71,7 @@ const SignUpForm = () => {
       let responseJson = await response.json();
       if(response.status == 200){
         var retreivedKey = responseJson['createResponse'];
+        Alert.alert('SF Lead Created', '(' + retreivedKey + ') set as ContactKey');
         await setContactKey(retreivedKey);
         await MCReactModule.setContactKey(retreivedKey);
         await MCReactModule.enablePush;

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Button,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 
 import MCReactModule from 'react-native-marketingcloudsdk';
@@ -16,17 +17,19 @@ const SignUpForm = () => {
   const [lastname, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
-  const [showContactKeyInput, setShowContactKeyInput] = useState('');
+  const [enableContactKeySet, setEnableContactKeySet] = useState(false);
 
   // GET contact key from SFMC SDK and set it to state variable contactKey
   const getContactKey = async () => {
-    const contactKey = await MCReactModule.getContactKey();
-    console.log(contactKey);
-    if (contactKey == undefined || contactKey.length == 0){
-      setShowContactKeyInput(true);
+    const retreivedKey = await MCReactModule.getContactKey();
+    console.log(retreivedKey);
+    if (retreivedKey == undefined || retreivedKey.length == 0){
+      setEnableContactKeySet(false);
     }else{
-      await setContactKey(contactKey);
-      applyContactKey();
+      await setContactKey(retreivedKey);
+      await MCReactModule.setContactKey(retreivedKey);
+      await MCReactModule.enablePush;
+      setEnableContactKeySet(true);
     }
   };
 
@@ -39,21 +42,50 @@ const SignUpForm = () => {
     console.log(contactKey);
     await MCReactModule.setContactKey(contactKey);
     await MCReactModule.enablePush;
-    setShowContactKeyInput(false);
+    setEnableContactKeySet(true);
   };
 
   // POST data to SFMC SDK
-  const postContactData = async () => {
-    const data = {
-      ContactKey: contactKey,
-      Attributes: {
-        FirstName: firstname,
-        LastName: lastname,
-        Email: email,
-        Company: company,
-      },
-    };
-    await MCReactModule.postContactData(data);
+  const setContactInfo = async () => {
+    try {
+      var body = {
+        'firstName' : firstname,
+        'lastName' : lastname,
+        'email' : email,
+        'company' : company
+      }
+      var formBody = [];
+      for (var property in body) {
+        var encodedKey = encodeURIComponent(property);
+        var encodedValue = encodeURIComponent(body[property]);
+        formBody.push(encodedKey + "=" + encodedValue);
+      }
+      formBody = formBody.join("&");
+      let response = await fetch('https://mchl2nbhxv6-wy1sw36p75pysf08.pub.sfmc-content.com/0rqi3ckl3xm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body: formBody,
+      });
+      let responseJson = await response.json();
+      if(response.status == 200){
+        var retreivedKey = responseJson['createResponse'];
+        await setContactKey(retreivedKey);
+        await MCReactModule.setContactKey(retreivedKey);
+        await MCReactModule.enablePush;
+        setEnableContactKeySet(true);
+      }else{
+        Alert.alert('SF Create', 'Error During API Call');
+      console.error(response);
+      setEnableContactKeySet(false);
+      }
+      console.log(responseJson);
+    } catch (error) {
+      Alert.alert('SF Lead Create', 'Error During API Call');
+      console.error(error);
+      setEnableContactKeySet(false);
+    }
   };
 
   const getSFContactInfo = async () => {
@@ -82,8 +114,10 @@ const SignUpForm = () => {
           console.log(responseJson['recordCount'] > 0);
           if (responseJson['id'] == null && responseJson['recordCount'] > 0){
             Alert.alert('SF Contact Retrieve', 'Multiple Contact Found\n(' + responseJson['recordCount'] + ') Rows Found' );
+            setEnableContactKeySet(false);
           }else{
             Alert.alert('SF Contact Retrieve', 'No Contacts Found For Email');
+            setEnableContactKeySet(false);
           }   
         }else{
           if (responseJson['id'] != undefined && responseJson['id'] != null &&  responseJson['id'].length > 0){
@@ -92,54 +126,45 @@ const SignUpForm = () => {
             setContactKey(responseJson['id']);
             await MCReactModule.setContactKey(responseJson['id']);
             await MCReactModule.enablePush;
-            setShowContactKeyInput(false);
+            setEnableContactKeySet(true);
           }else{
             Alert.alert('SF Contact Retrieve', 'No Id Returned For Email');
+            setEnableContactKeySet(false);
           }
         }
       } catch (error) {
         Alert.alert('SF Contact Retrieve', 'Error During API Call');
         console.error(error);
+        setEnableContactKeySet(false);
       }
   };
 
   const resetApp = async () => {
   };
 
-  const EnterContactKey = () => (
-      <View style={{ borderTopColor: '#bdbdbd', borderTopWidth: 2, borderBottomColor: '#bdbdbd', borderBottomWidth: 2, width: '90%', marginBottom: 20, paddingTop: 20, paddingBottom: 20}}>
-          <Text style={styles.titleText}>Contact Key Retreival & Set</Text>
+  return (
+    <>
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
+        <View style={{marginBottom: 20 }}>
+        <Text style={styles.titleText}>Mobile Push Demo App</Text>
+        </View>
+        <View style={{ borderTopColor: '#bdbdbd', borderTopWidth: 2, borderBottomColor: '#bdbdbd', borderBottomWidth: 2, width: '90%', marginBottom: 20, paddingTop: 20, paddingBottom: 20}}>
+          <Text style={styles.titleText}>Contact Key Set</Text>
           <TextInput
             style={styles.input}
             placeholder="Contact Key"
             autoCapitalize="none"
             placeholderTextColor="white"
             onChangeText={contactKey => setContactKey(contactKey)}
+            value={contactKey}
           />
-          <Button title="Set Device Contact Key" onPress={applyContactKey}/>
+          <Button title="Set Contact Key" onPress={applyContactKey} disabled={enableContactKeySet}/>
         </View>
-  )
-
-  const DisplayContactKey = () => (
-    <View style={{ borderTopColor: '#bdbdbd', borderTopWidth: 2, borderBottomColor: '#bdbdbd', borderBottomWidth: 2, width: '90%', marginBottom: 20, paddingTop: 20, paddingBottom: 20}}>
-      <Text style={styles.titleText}>Contact Key Set</Text>
-      <Text>{contactKey}</Text>
-    </View>
-  )
-
-  return (
-    <>
-      <View style={styles.container}>
-        <Text style={styles.titleText}>Mobile Push Demo App</Text>
-        <View style={{marginBottom: 20 }}>
-          <Button title="Reset Demo App" onPress={resetApp}/>
-        </View>
-        {showContactKeyInput ? <EnterContactKey /> : <DisplayContactKey /> }
         <View style={{ borderBottomColor: '#bdbdbd', borderBottomWidth: 2, width: '90%', marginBottom: 20, paddingBottom: 20}}>
-          <Text style={styles.titleText}>Existing Contact</Text>
+          <Text style={styles.titleText}>Existing Contact Search & Set</Text>
           <TextInput
             style={styles.input}
-            placeholder="SF Contact Email"
+            placeholder="Contact Email"
             autoCapitalize="none"
             placeholderTextColor="white"
             keyboardType="email-address"
@@ -147,15 +172,16 @@ const SignUpForm = () => {
             value={email}
             onChangeText={email => setEmail(email)}
           />
-          <Button title="Get SF ID And Set Contact Key" onPress={getSFContactInfo}/>
+          <Button title="Get SF Id & Set Contact Key" onPress={getSFContactInfo} disabled={enableContactKeySet}/>
         </View>
-        {/* <View style={{width: '90%', marginBottom: 20, paddingBottom: 20}}>
+        <View style={{width: '90%', marginBottom: 20, paddingBottom: 20}}>
           <Text style={styles.titleText}>New Contact</Text>
           <TextInput
             style={styles.input}
             placeholder="First Name"
             autoCapitalize="none"
             placeholderTextColor="white"
+            value={firstname}
             onChangeText={firstname => setFirstName(firstname)}
           />
           <TextInput
@@ -163,6 +189,7 @@ const SignUpForm = () => {
             placeholder="Last Name"
             autoCapitalize="none"
             placeholderTextColor="white"
+            value={lastname}
             onChangeText={lastname => setLastName(lastname)}
           />
           <TextInput
@@ -180,11 +207,12 @@ const SignUpForm = () => {
             placeholder="Company"
             autoCapitalize="none"
             placeholderTextColor="white"
+            value={company}
             onChangeText={company => setCompany(company)}
           />
-          <Button title="Create Contact And Get Key" onPress={getSFContactInfo} />
-        </View> */}
-      </View>
+          <Button title="Create Contact & Set Contact Key" onPress={setContactInfo} disabled={enableContactKeySet}/>
+        </View>
+      </KeyboardAvoidingView>
     </>
   );
 };

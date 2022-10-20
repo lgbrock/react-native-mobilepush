@@ -128,6 +128,10 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
     os_log_debug(OS_LOG_DEFAULT, "didFailToRegisterForRemoteNotificationsWithError = %@", error);
 }
 
+- (void)applicationDidBecomeActive:(UIApplication *)application{
+  [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+}
+
 // The method will be called on the delegate when the user responded to the notification by opening
 // the application, dismissing the notification or choosing a UNNotificationAction. The delegate
 // must be set before the application returns from applicationDidFinishLaunching:.

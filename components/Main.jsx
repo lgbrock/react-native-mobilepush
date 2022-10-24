@@ -176,7 +176,7 @@ const SignUpForm = () => {
           <Button title="Get SF Id & Set Contact Key" onPress={getSFContactInfo} disabled={enableContactKeySet}/>
         </View>
         <View style={{width: '90%', marginBottom: 20, paddingBottom: 20}}>
-          <Text style={styles.titleText}>New Contact</Text>
+          <Text style={styles.titleText}>New Lead</Text>
           <TextInput
             style={styles.input}
             placeholder="First Name"
@@ -211,7 +211,7 @@ const SignUpForm = () => {
             value={company}
             onChangeText={company => setCompany(company)}
           />
-          <Button title="Create Contact & Set Contact Key" onPress={setContactInfo} disabled={enableContactKeySet}/>
+          <Button title="Create Lead & Set Contact Key" onPress={setContactInfo} disabled={enableContactKeySet}/>
         </View>
       </KeyboardAvoidingView>
     </>
